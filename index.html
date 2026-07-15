@@ -22,6 +22,27 @@
       --orange:      #E8873A;
       --orange-soft: #F6C79B;
       --leaf:        #7A9E7E;
+      --bg-start:    #4E342E;
+      --bg-mid:      #6D4C41;
+      --bg-end:      #8D6E63;
+      --shadow:      rgba(0, 0, 0, .35);
+      --text-muted:  #8D6E63;
+    }
+
+    body.dark-mode {
+      --brown-dark:  #F7E9D8;
+      --brown-mid:   #F4D2A6;
+      --brown-soft:  #D7B995;
+      --cream:       #2E2737;
+      --cream-2:     #3E3546;
+      --orange:      #F4A261;
+      --orange-soft: #8A6C4E;
+      --leaf:        #85B183;
+      --bg-start:    #17131E;
+      --bg-mid:      #221B2B;
+      --bg-end:      #312A3A;
+      --shadow:      rgba(0, 0, 0, .6);
+      --text-muted:  #D8C5A2;
     }
 
     * { font-family: 'Mali', cursive; }
@@ -29,10 +50,11 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: linear-gradient(160deg, #4E342E 0%, #6D4C41 55%, #8D6E63 100%);
+      background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-mid) 55%, var(--bg-end) 100%);
       color: var(--brown-dark);
       overflow-x: hidden;
       position: relative;
+      transition: background .35s ease, color .35s ease;
     }
 
     /* ---------- ลูกเล่น: หัวใจ & กล้วยลอยพื้นหลัง ---------- */
@@ -70,11 +92,30 @@
       background: var(--cream);
       border: 4px solid var(--orange-soft);
       border-radius: 32px;
-      box-shadow: 0 24px 50px rgba(0, 0, 0, .35);
+      box-shadow: 0 24px 50px var(--shadow);
       padding: 90px 28px 34px;
       position: relative;
       text-align: center;
+      transition: background .35s ease, border-color .35s ease, box-shadow .35s ease;
     }
+
+    .theme-toggle {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--orange);
+      color: #fff;
+      padding: 8px 12px;
+      font-size: .9rem;
+      font-weight: 700;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, .2);
+      cursor: pointer;
+      transition: transform .2s ease, background .25s ease;
+      z-index: 2;
+    }
+    .theme-toggle:hover { transform: translateY(-2px); }
 
     /* ---------- รูปโปรไฟล์วงกลม ---------- */
     .avatar {
@@ -115,7 +156,7 @@
       border-radius: 20px;
       padding: 14px 10px;
       height: 100%;
-      transition: transform .25s ease;
+      transition: transform .25s ease, background .25s ease;
     }
     .info-box:hover { transform: translateY(-4px); }
     .info-box .ico   { font-size: 1.5rem; }
@@ -140,7 +181,7 @@
       margin: 4px 3px;
       font-size: .92rem;
       box-shadow: 0 3px 0 #c96f2a;
-      transition: transform .2s ease;
+      transition: transform .2s ease, background .25s ease;
     }
     .trait:hover { transform: translateY(-3px) rotate(-2deg); }
     .trait.leaf  { background: var(--leaf); box-shadow: 0 3px 0 #5f8064; }
@@ -157,6 +198,7 @@
       text-align: left;
       font-size: .95rem;
       flex-shrink: 0;
+      color: var(--brown-dark);
     }
     .progress {
       flex: 1;
@@ -180,12 +222,14 @@
 
     /* ---------- กล่องของรัก ---------- */
     .fav-box {
-      background: linear-gradient(135deg, #FBEEDF, #F6DFC4);
+      background: linear-gradient(135deg, var(--cream-2), var(--orange-soft));
       border: 2px dashed var(--orange);
       border-radius: 20px;
       padding: 16px;
       text-align: left;
+      transition: background .25s ease, border-color .25s ease;
     }
+    .fav-box .text-muted { color: var(--text-muted) !important; }
 
     .divider {
       border: none;
@@ -207,6 +251,7 @@
       .avatar { width: 160px; height: 160px; top: -85px; }
       .profile-card { padding-top: 80px; }
       .stat-name { width: 100px; font-size: .85rem; }
+      .theme-toggle { top: 12px; right: 12px; padding: 7px 10px; font-size: .8rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -221,6 +266,7 @@
 
   <main class="profile-wrap">
     <section class="profile-card">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">🌙 Dark mode</button>
 
       <img src="punch.png" alt="รูปโปรไฟล์น้องพันซ์ ลิงน้อยกำลังกอดตุ๊กตาอุรังอุตัง" class="avatar">
       <br><br>
@@ -348,6 +394,25 @@
       el.style.animationDelay = (-Math.random() * 18) + 's';
       box.appendChild(el);
     }
+
+    // ----- ปุ่มเปลี่ยนธีม -----
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('punch-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+
+    const applyTheme = (theme) => {
+      document.body.classList.toggle('dark-mode', theme === 'dark');
+      themeToggle.textContent = theme === 'dark' ? '☀️ Light mode' : '🌙 Dark mode';
+      themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+      localStorage.setItem('punch-theme', theme);
+    };
+
+    applyTheme(initialTheme);
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+      applyTheme(nextTheme);
+    });
 
     // ----- แถบสถิติวิ่งเมื่อเลื่อนถึง -----
     const bars = document.querySelectorAll('.progress-bar');
